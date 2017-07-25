@@ -1,0 +1,29 @@
+{
+  "name": "ttt",
+  "version": "1.0.0",
+  "description": "Tic Tac Toe",
+  "main": "app.js",
+  "directories": {
+    "test": "__test__"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ds.lan:/volume1/git_repos/js"
+  },
+  "scripts": {
+    "test": "jest",
+    "start": "node src/app.js"
+  },
+  "author": "Harald Kubota",
+  "license": "ISC",
+  "devDependencies": {
+    "jest-cli": "^19.0.2",
+    "jshint": "^2.9.4"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverage": true
+  },
+  "dependencies": {
+  }
+}

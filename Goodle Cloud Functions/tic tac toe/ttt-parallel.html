@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Tic Tac Toe</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rangeslider.js/2.3.1/rangeslider.min.css">
+    <link rel="stylesheet" href="ttt.css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- Leave those next 4 lines if you care about users using IE8 -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+
+<div class="row">
+  <div id="0" class="col-xs-4 hvr-fade"></div>
+  <div id="1" class="col-xs-4 hvr-fade"></div>
+  <div id="2" class="col-xs-4 hvr-fade"></div>
+  <div id="3" class="col-xs-4 hvr-fade"></div>
+  <div id="4" class="col-xs-4 hvr-fade"></div>
+  <div id="5" class="col-xs-4 hvr-fade"></div>
+  <div id="6" class="col-xs-4 hvr-fade"></div>
+  <div id="7" class="col-xs-4 hvr-fade"></div>
+  <div id="8" class="col-xs-4 hvr-fade"></div>
+</div>
+<div id="stats" class="results">X:0 O:0 Draw:0
+</div>
+
+<div>
+<input id="levelX" min="0' max="5", step="1" value="3">
+<input id="levelO" min="0' max="5", step="1" value="3">
+<button type="button" class="btn btn-default" onclick="runSimulation(1, $('#levelX').val(), $('#levelO').val())">Start 1</button>
+<button type="button" class="btn btn-default" onclick="runSimulation(10, $('#levelX').val(), $('#levelO').val())">Start 10</button>
+<button type="button" class="btn btn-default" onclick="runSimulation(100, $('#levelX').val(), $('#levelO').val())">Start 100</button>
+<button type="button" class="btn btn-default" onclick="stats.X=stats.O=stats.Draw=0; updateStats();">Reset</button>
+
+
+</div>
+
+<script>
+
+
+
+var stats={
+  X: 0,
+  O: 0,
+  Draw: 0
+}
+
+var gameEvent = new CustomEvent('game');
+document.body.addEventListener("XWin", updateStats, false);
+document.body.addEventListener("OWin", updateStats, false);
+document.body.addEventListener("Draw", updateStats, false);
+
+var winEvents={
+  X: new CustomEvent("XWin"),
+  O: new CustomEvent("OWin"),
+  Draw: new CustomEvent("Draw")
+}
+
+function drawBoard(boardString) {
+  for (let i=0; i<9; ++i) {
+    $('#'+i).text(boardString.charAt(i));
+  }
+}
+
+
+function otherPlayer(player) {
+  return (player === 'X') ? 'O' : 'X';
+}
+
+function updateStats() {
+  $('#stats').text("X:"+stats.X+" O:"+stats.O+" Draw:"+stats.Draw);
+}
+
+function oneGame(player, levelX, levelO, boardString) {
+  
+    $.ajax('https://us-central1-take-5-XXXXXX.cloudfunctions.net/ttt',{
+      data: {
+        'cmd': 'nextMove',
+        'player': player,
+        'level': (player === 'X') ? levelX : levelO,
+        'board': boardString
+      }
+    })
+    .then((res) => {
+      theMove = res.nextMove;
+      if (theMove != -1) {
+        boardString=res.board;
+        drawBoard(boardString);
+        if (res.checkWin) {
+          console.log("Player "+res.player+" won!");
+          stats[res.player]++;
+          document.body.dispatchEvent(winEvents[player]);
+        } else {
+          oneGame(otherPlayer(player), levelX, levelO, boardString);
+        }
+      } else {
+        console.log("Draw!");
+        stats.Draw++;
+        document.body.dispatchEvent(winEvents.Draw);
+      }
+    });
+}
+
+function updateBoard(position, player, boardString) {
+  let board=boardString.split('');
+  board[position]=player;
+  return board.join('');
+}
+
+// Run a simulation with graphical feedback
+
+function runSimulation(n, levelX, levelO) {
+
+  console.log("Trying "+n+" iterations at level X/O "+levelX+"/"+levelO);
+  
+  for (let i=0; i<n ; ++i) {
+    oneGame('X', levelX, levelO, '.........');
+  }
+
+}
+</script>
+
+    <!-- Including Bootstrap JS (with its jQuery dependency) so that dynamic components work -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/rangeslider.js/2.3.1/rangeslider.min.js"></script>
+
+  </body>
+</html>
